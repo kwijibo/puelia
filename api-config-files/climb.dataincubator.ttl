@@ -1,0 +1,144 @@
+@base <http://keithalexander.co.uk/climbing/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix api: <http://purl.org/linked-data/api/vocab#> .
+@prefix gc: <http://puelia-php.googlecode.com/svn/trunk/documents/config.ttl#> .
+@prefix rel: <http://vocab.org/relationship/> .
+@prefix spec: <http://www.epimorphics.com/examples/specSchools#> .
+@prefix climb: <http://climb.dataincubator.org/vocabs/climb/> .
+@prefix puelia: <http://kwijibo.talis.com/vocabs/puelia#> .
+
+
+<#ClimbingAPI> a api:API ;
+	rdfs:label "Climb Data"@en ;
+#	api:base "http://localhost" ;
+	api:maxPageSize "50";
+	api:defaultPageSize "10" ;
+	api:endpoint [
+		a api:ItemEndpoint ;
+		rdfs:label "Mountain"@en ;
+		api:uriTemplate "/Climb/Mountain/{name}" ;
+	    api:itemTemplate "http://dbpedia.org/resource/{name}" ;
+		api:exampleRequestPath "/Climb/Mountain/Ben_Nevis"
+		], <#routeItem>,<#ukcRouteItem>,
+		<#routesEndpoint> , <#routesByGrade> , <#routesByStyle> , <#Venues> ;
+	api:sparqlEndpoint <http://api.talis.com/stores/kwijibo-dev3/services/sparql> ;
+	api:defaultViewer api:describeViewer ;
+	api:defaultFormatter <#Html> ;
+	api:contentNegotiation api:parameterBased ;
+	api:variable [
+	    api:name "Route" ;
+	    api:value "http://climb.dataincubator.org/vocabs/climb/Route" ;
+	    api:type rdfs:Resource ;
+	  ],
+	[
+		api:name "grade" ;
+		api:value "HVS"
+	] ;
+	api:variable [
+		api:name "styleName" ;
+		api:value ""
+		] ;
+	api:variable [
+		api:name "styleUri" ;
+		api:value "http://climb.dataincubator.org/styles/{styleName}" ;
+		api:type rdfs:Resource
+		] ;
+	api:dataset <http://climb.dataincubator.org/dataset>
+	 .
+
+<#routeItem> a api:ItemEndpoint ;
+	api:uriTemplate "/Climb/Routes/{siteID}/{routeID}";
+	api:itemTemplate "http://climb.dataincubator.org/routes/{siteID}/{routeID}";
+	api:exampleRequestPath "/Climb/Routes/bouldr/102" 
+.
+
+<#ukcRouteItem> a api:ItemEndpoint ;
+	api:uriTemplate "/Climb/Venues/{siteName}-{venueID}/{routeID}";
+	api:itemTemplate "http://climb.dataincubator.org/venues/{siteName}/{venueID}/climbs/{routeID}";
+	api:exampleRequestPath "/Climb/Venues/ukc-10024/120188" ;
+	api:defaultViewer <#extendedViewer>
+.
+
+<#extendedViewer> a api:Viewer ;
+	api:name "extended" ;
+	api:properties "grading.*" 
+.
+
+<#routesEndpoint> a api:ListEndpoint ;
+		rdfs:label "Routes"@en ;
+		api:uriTemplate "/Climb/Routes" ;
+		api:defaultViewer [
+				api:name "simple" ;
+				api:property rdfs:label, rdf:type
+			] ;
+		api:selector [
+			api:where " ?item a climb:Route . FILTER(REGEX(str(?item), \"ukc\"))"
+#			api:filter "type={Route}"
+		] ; 
+			api:dataset <http://climb.dataincubator.org/datasets/ukc>
+		.
+
+<#routesSelector> api:filter "type={Route}" .
+
+<#routesByGrade> a api:ListEndpoint ;
+	rdfs:label "Routes By Grade"@en ;
+	api:uriTemplate "/Climb/Routes/byGrade/{grade}" ;
+	api:exampleRequestPath "/Climb/Routes/byGrade/HVS" ;
+	api:selector [
+			api:parent <#routesSelector> ;
+			api:filter "grading.value={grade}"
+		] .
+
+<#routesByStyle> a api:ListEndpoint ;
+	rdfs:label "Routes By Style"@en ;
+	api:uriTemplate "/Climb/Routes/byStyle/{styleName}" ;
+	api:exampleRequestPath "/Climb/Routes/byStyle/Trad" ;
+		
+	api:selector [
+		api:parent <#routesSelector> ;
+		api:filter "grading.style={styleUri}"
+		] .
+
+
+<#Venues> a api:ListEndpoint ;
+	rdfs:label "Venues"@en ;
+	api:uriTemplate "/Climb/Venues";
+	api:selector [ 
+					api:filter "type=Venue" ; 
+					api:where "?item a climb:Venue . FILTER(REGEX(str(?item), \"ukc\"))" ] .
+
+ <#Html> a puelia:PhpFormatter ;
+     puelia:innerTemplate "views/php-templates/puelia-inner.php";
+     puelia:outerTemplate "views/php-templates/puelia-outer.php" ;
+     api:mimeType "text/html","application/xhtml+xml" ;
+     api:name "html" .
+ 
+climb:grading a rdf:Property ; 
+		api:label "grading" .
+
+climb:style a rdf:Property ; 
+		api:label "style" .
+
+rdf:value a rdf:Property ;
+	api:label "value" .
+
+rdfs:label a rdf:Property ;
+	api:label "label" .
+
+rdf:type a rdf:Property ;
+	api:label "type" .
+
+climb:Venue api:label "Venue" .
+
+<#xsltHtml>
+ 	a api:XsltFormatter ;
+	api:name "html" ;
+	api:mimeType "text/html" ;
+	api:stylesheet "views/xslt-styles/result.xsl" 
+	.

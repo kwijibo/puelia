@@ -1,0 +1,73 @@
+@base <http://keithalexander.co.uk/pbac/api-config#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix api: <http://purl.org/linked-data/api/vocab#> .
+@prefix rel: <http://vocab.org/relationship/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix pbac: <http://keithalexander.co.uk/vocabs/pbac#> .
+@prefix puelia: <http://kwijibo.talis.com/vocabs/puelia#> .
+
+
+#vocab#
+pbac:isNamedCollectorOn api:label "isNamedCollectorOn" .
+foaf:Person api:label "Person" .
+rdf:type api:label "type" .
+owl:sameAs api:label "sameAs" .
+<api>
+	rdfs:label "Printed Book Auction Catalogues" ;
+	a api:API ;
+	api:sparqlEndpoint <http://api.talis.com/stores/pbac/services/sparql> ;
+	api:endpoint 	
+					<sources> , 
+					<pages> , 
+					<page> , 
+					<books> , 
+					<book> , 
+					<creators> , 
+					<creator> , 
+					<collectors> ,
+					<collector> ,
+				 	<collections> ;
+	api:dataset <http://keithalexander.co.uk/pbac> ;
+	api:vocabulary rdf: , foaf: ;
+	api:defaultFormatter <Html> 
+	.
+
+<collectors>
+	a api:ListEndpoint ;
+	api:uriTemplate "/collectors";
+	rdfs:label "Collectors"@en ;
+	api:selector [
+			api:filter "type=Person&exists-isNamedCollectorOn=true"
+		] ;
+	api:defaultViewer <collectorsViewer>
+	 .
+<page>
+	a api:ItemEndpoint ;
+	api:uriTemplate "/pages/{pageID}" ;
+	api:itemTemplate "{base}/pages/{pageID}" ;
+	api:exampleRequestPath "/pages/1" ;
+	api:defaultViewer <pageView> ;
+	.
+
+# Viewers #
+<pageView> 
+	a api:Viewer ;
+	api:properties "lists.label,*" 
+	.
+<collectorsViewer>
+	a api:Viewer ;
+	api:properties "*,sameAs.*,isNamedCollectorOn.*" ;
+	api:name "collectors" 
+	.
+	
+<Html> a puelia:PhpFormatter ;
+    puelia:innerTemplate "views/php-templates/puelia-inner.php";
+    puelia:outerTemplate "views/php-templates/puelia-outer.php" ;
+    api:mimeType "text/html" ;
+    api:name "html" .

@@ -1,0 +1,49 @@
+@base <http://example.com/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix api: <http://purl.org/linked-data/api/vocab#> .
+@prefix rel: <http://vocab.org/relationship/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+<#voiDaPI> a api:API ;
+	rdfs:label "voiD Data"@en ;
+	api:maxPageSize "50";
+	api:defaultPageSize "10" ;
+	api:endpoint [a api:ItemEndpoint ;
+		api:uriTemplate "/Datasets/?uri={uri}" ;
+	    api:itemTemplate "{uri}" 
+		], <http://localhost/void-config/datasetEndpoint>, <licenseEndpoint> ;
+	api:sparqlEndpoint <http://api.talis.com/stores/kwijibo-dev3/services/sparql> ;
+	api:defaultViewer api:describeViewer ;
+	api:contentNegotiation api:parameterBased ;
+	api:vocabulary  void: ;
+	dcterms:description "An API to give access to a dataset of voiD Dataset descriptions."@en-gb ;
+	api:defaultFormatter api:RdfXmlFormatter
+	 .
+
+<http://localhost/void-config/datasetEndpoint>
+				a api:ListEndpoint ;
+				api:uriTemplate "/Datasets" ;
+				api:exampleRequestPath "/Datasets" ;
+				api:selector [
+					api:filter "type=Dataset"
+					] .
+
+<licenseEndpoint> a api:ListEndpoint ;
+	api:uriTemplate "/DatasetsByLicense" ;
+	api:selector <licenseSelector> .
+
+<licenseSelector> a api:Selector ;
+	api:where """
+	?item a void:Dataset ;
+	dcterms:license ?license .
+	""" .
+
+
+
+void:Dataset api:label "Dataset" .

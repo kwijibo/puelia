@@ -1,0 +1,35 @@
+@base <http://localhost/api-config> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix api: <http://purl.org/linked-data/api/vocab#> .
+@prefix gc: <http://puelia-php.googlecode.com/svn/trunk/documents/config.ttl#> .
+@prefix rel: <http://vocab.org/relationship/> .
+@prefix spec: <http://www.epimorphics.com/examples/specSchools#> .
+@prefix climb: <http://climb.dataincubator.org/vocabs/climb/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+<#schemacache> a api:API ;
+	rdfs:label "SchemaCache"@en ;
+	api:maxPageSize "50";
+	api:defaultPageSize "10" ;
+	api:sparqlEndpoint <http://api.talis.com/stores/schema-cache-dev/services/sparql> ;
+	api:defaultViewer api:describeViewer ;
+	api:contentNegotiation api:parameterBased ;
+	dcterms:description "An API for browsing and searching RDF vocabularies, ontologies and schema."@en-gb ;
+	api:defaultFormatter api:RdfXmlFormatter ;
+	api:endpoint <#schemaEP>
+	 .
+
+<#schemaEP> 
+    a api:ListEndpoint ;
+    rdfs:label "Schemas" ;
+    api:uriTemplate "/schema" ;
+    api:selector [
+        api:where "?something rdfs:isDefinedBy ?item . ?item ?p ?o . "
+    ] .
+
